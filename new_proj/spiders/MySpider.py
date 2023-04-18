@@ -34,14 +34,17 @@ class MySpider(scrapy.Spider):
         for i in range(40):
             actions.move_to_element(load_news_btn).perform()
             load_news_btn.click()
-            time.sleep(2)
+            time.sleep(1)
         actions.move_to_element(main_title).perform()
         link_elements = driver.find_elements(self.ARTICLE_CARDS[0], self.ARTICLE_CARDS[1])
-        for link_el in link_elements[950:1000]:
-            yield Request(link_el.get_attribute("href"), callback=self.parse)
+        for link_el in link_elements:
+            href = link_el.get_attribute("href")
+            request = Request(href,
+                              callback=self.parse)
+            yield request
 
     def parse(self, response):
-        item = OurTeamworkItem()
+        item = NewProjItem()
         item['article_uuid'] = hashlib.sha256(str(response.url).encode('utf-8')).hexdigest()
         item['article_title'] = response.xpath(self.ARTICLE_TITLE_TEXT_XPATH).extract()
         item['article_text'] = "\n".join(response.xpath(self.ARTICLE_TEXT_XPATH).extract())
